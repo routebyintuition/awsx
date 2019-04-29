@@ -1,0 +1,2 @@
+# awsx
+Go AWS utilities
