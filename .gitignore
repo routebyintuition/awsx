@@ -3,3 +3,5 @@ memcached.go
 mysql.go
 postgres.go
 redis.go
+ec2.go
+fargate.go
