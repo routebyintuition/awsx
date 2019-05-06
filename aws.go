@@ -6,12 +6,15 @@ import (
 	"os"
 	"time"
 
+	"github.com/aws/aws-sdk-go/service/elasticache"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
 	"github.com/aws/aws-sdk-go/aws/defaults"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/rds"
 )
 
 // Config is the configuration definition for our AWS services.
@@ -26,13 +29,21 @@ type Config struct {
 	Profile      string // optional: which credential profile to utilize
 	Providers    []credentials.Provider
 	Session      *session.Session
+	Service      *Services
+	ServiceSts   *Services
 	panicOnErr   bool // Should we panic the app or proceed if we can't publish to CWL
+}
+
+// Services stores the used client types so I don't have to remember to do that.
+type Services struct {
+	Rds *rds.RDS
+	Ec  *elasticache.ElastiCache
 }
 
 // NewAWS creates a new Config struct and populates it with an empty provider chain
 func NewAWS() *Config {
 	p := make([]credentials.Provider, 0)
-	return &Config{Providers: p}
+	return &Config{Providers: p, Service: &Services{}, ServiceSts: &Services{}}
 }
 
 // WithStatic adds a static credential provider to the provider chain
