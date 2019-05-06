@@ -62,6 +62,38 @@ The above example works for standard clusters that have Redis Cluster Mode disab
         fmt.Println("Cluster Mode Disabled")
     }
 
+We can also pull out the read replicas for their own connections to read:
+
+    endpoint, err := a.GetRedisPrimaryEndpoint("redis-cluster")
+
+    if err != nil {
+        fmt.Println(err)
+    }
+
+    if endpoint.ClusterEnabled {
+        fmt.Println("Cluster Mode Enabled")
+        fmt.Println("Cluster Configuration Endpoint: ", endpoint.ClusterConfigString())
+    } else {
+        fmt.Println("Cluster Mode Disabled")
+        fmt.Println("Primary Endpoint: ", endpoint.PrimaryString())
+    }
+
+    if endpoint.ReadReplicas {
+        fmt.Println("Read Replicas available: ")
+        for _, v := range endpoint.ReadEndpoints {
+            fmt.Println("Read Replica: ", v)
+        }
+    }
+
+    /*
+    Outputs:
+    Cluster Mode Disabled
+    Primary Endpoint:  redis-cluster.XXXXXX.ng.0001.XXXX.cache.amazonaws.com:6379
+    Read Replicas available:
+    Read Replica:  redis-cluster-001.XXXXXX.0001.XXXX.cache.amazonaws.com:6379
+    Read Replica:  redis-cluster-002.XXXXXX.0001.XXXX.cache.amazonaws.com:6379
+    */
+
 ### Redis Cluster
 
 You can also use this tool to find your cluster configuration endpoint for use with Redis cluster:

@@ -15,7 +15,7 @@ type RedisEndpoints struct {
 	// The primary endpoint string
 	Primary          *RedisEndpoint
 	ClusterConfig    *RedisEndpoint
-	Read             []*RedisEndpoint
+	ReadEndpoints    []*RedisEndpoint
 	ReplicationGroup bool
 	ReadReplicas     bool
 	ClusterEnabled   bool
@@ -32,6 +32,17 @@ type RedisEndpoint struct {
 // in libraries like redigo and go-redis of the primary endpoint
 func (res *RedisEndpoints) PrimaryString() string {
 	return res.Primary.Host + ":" + res.Primary.Port
+}
+
+// Readers returns a string slice of each read associated with the redis cluster
+// These are each endpoints that can be used for read connections
+func (res *RedisEndpoints) Readers() []string {
+	str := make([]string, len(res.ReadEndpoints))
+	for _, v := range res.ReadEndpoints {
+		buff := v.Host + ":" + v.Port
+		str = append(str, buff)
+	}
+	return str
 }
 
 // ClusterConfigString provides the cluster configuration endpoint for Redis Cluster
@@ -89,7 +100,7 @@ func (a *Config) GetRedisAllEndpoints(cluster string) (*RedisEndpoints, error) {
 		ReplicationGroup: false,
 		ReadReplicas:     false,
 	}
-	res.Read = make([]*RedisEndpoint, 0)
+	res.ReadEndpoints = make([]*RedisEndpoint, 0)
 
 	res, err = a.GetRedisPrimaryEndpoint(cluster)
 	if err != nil {
@@ -139,7 +150,7 @@ func (a *Config) GetRedisPrimaryEndpoint(cluster string) (*RedisEndpoints, error
 						Host: *v.ReadEndpoint.Address,
 						Port: strconv.FormatInt(*v.ReadEndpoint.Port, 10),
 					}
-					res.Read = append(res.Read, entry)
+					res.ReadEndpoints = append(res.ReadEndpoints, entry)
 				}
 			}
 		}
